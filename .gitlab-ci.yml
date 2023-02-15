@@ -1,0 +1,96 @@
+#构建步骤，先执行build，然后执行deploy
+stages:
+  - build
+  - deploy
+
+#设置全局的环境变量，所有的stage中都可以引用这里面的变量
+variables:
+  #docker 镜像地址，由Docker镜像仓库地址(CI_REGISTRY_REPOSITORY)+项目地址(CI_PROJECT_PATH_SLUG)+项目分支(CI_COMMIT_REF_SLUG):镜像版本号(CI_PIPELINE_IID)
+  CI_APPLICATION_REPOSITORY: "$CI_REGISTRY_REPOSITORY/$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG:$CI_PIPELINE_IID"
+  #docker容器名称,项目地址+版本号
+  CI_CONTAINER_NAME: "$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG"
+  #k8s命名空间 项目地址+项目id
+  CI_NAMESPACE: "$CI_PROJECT_PATH_SLUG-$CI_PROJECT_ID"
+  # ingress访问地址 项目地址+分支+项目id+你的二级域名(我这里写死了"mynetcore.com"，可以配置到ci环境变量中)
+  CI_HOST: "$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG-$CI_PROJECT_ID.yhsyc.club"
+  # k8s镜像拉取密钥,用于访问你的私人镜像仓库
+  secret_name: "gitlab-secret"
+
+#构建镜像，并上传至镜像仓库
+build-job:
+  #表示用最在最新的docker容器中运行服务
+  image: docker:latest
+  #对应上面Stages中的build步骤
+  stage: build
+  services:
+    #在容器中再起一个docker:dind容器，后面的script命令会在该容器内运行
+    - docker:dind
+  before_script:
+    #登录我们自己的镜像服务
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+    #打印所有的环境变量，用于调试
+    - env
+    # 构建镜像
+    - docker build --pull -t "$CI_APPLICATION_REPOSITORY" .
+    # 推送镜像至仓库
+    - docker push $CI_APPLICATION_REPOSITORY
+
+
+#部署项目到k8s集群
+deploy-job:
+  stage: deploy
+  environment: production
+  image: docker:stable
+  script:
+    - env
+    - install_dependence
+    - install_kubectl
+    - kubectl_publish
+    - publish_finish
+  tags:
+    #这个就表示用我们自己的gitlab-runner执行了，"deploy"就是在注册gitlabrunner中填写的tag值。上面的build步骤没有写tag，他会用官方提供的一个默认runner执行(有使用时长限制)
+    - deploy
+
+
+.function: &function |
+  #这一步初始化一下容器的环境，更新apk包，安装基础的一些软件
+  function install_dependence() {
+    echo -e 'https://mirrors.aliyun.com/alpine/v3.6/main/\nhttps://mirrors.aliyun.com/alpine/v3.6/community/' > /etc/apk/repositories
+    apk update
+    apk add -U openssl curl tar gzip bash ca-certificates git gettext
+  }
+
+  #安装kubectl命令工具
+  function install_kubectl() {
+    #下载kubectl
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    #给kubectl赋执行权限
+    chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    #创建kubectl 的执行密钥文件夹，然后将kubectl的config配置文件下载到~/.kube/config。$CI_KUBE_CONFIG_URL 这个是我开了一个内网服务用于下载kubeconfig
+    mkdir ~/.kube && curl -o ~/.kube/config $CI_KUBE_CONFIG_URL
+  }
+
+  # 部署yaml
+  function kubectl_publish(){
+   #首先创建命名空间（检测命名空间是否存在，不存在则创建）
+    kubectl describe namespace "$CI_NAMESPACE" || kubectl create namespace "$CI_NAMESPACE"
+    # 创建 docker镜像的访问密钥，( 检测密钥是否存在，不存在则创建"kubectl create secret...."。最后后将密钥更新到当前项目的命名空间"kubectl apply ...")
+    kubectl describe secret $secret_name || kubectl create secret -n "$CI_NAMESPACE"  docker-registry $secret_name --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD  -o yaml --dry-run=client  | kubectl apply -n $CI_NAMESPACE -f -
+    # 将环境变量写入到yaml文件中，然后删除掉yaml中上次部署的资源
+    envsubst < kube.yaml | kubectl delete -n $CI_NAMESPACE -f - || echo "don't need delete"
+    # 将环境变量写入到yaml文件中，然后部署
+    envsubst < kube.yaml | kubectl apply -n $CI_NAMESPACE -f -
+  }
+
+  #部署完成，输出一下
+  function publish_finish(){
+    echo "visit url is http://$CI_HOST"
+    echo "Application successfully deployed."
+  }
+
+#这个是整个ci最先执行的语句，里面可以预定义函数和变量等
+before_script:
+  #执行上面的 .function: &function
+  - *function
