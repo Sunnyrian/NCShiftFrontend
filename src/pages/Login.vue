@@ -60,14 +60,14 @@ import Base64 from "crypto-js/enc-base64";
 
 const loginMethod = ref("");
 
-loginMethod.value = "stuID";
+loginMethod.value = "stu_id";
 
 const loginOptions = [
   {
     label: "用户登录",
     options: [
       {
-        value: "stuID",
+        value: "stu_id",
         label: "学号",
       },
       {
@@ -93,7 +93,7 @@ const labelPosition = ref("right");
 const user = reactive({
   nickname: "",
   account: "",
-  stuID: "",
+  stu_id: "",
   password: "",
 });
 
@@ -142,11 +142,11 @@ const login = (form: FormInstance | undefined) => {
   getStuID(loginMethod.value, user.account).then(() => {
     if (!form) return;
     form.validate((valid) => {
-      if (valid && user.stuID != "") {
+      if (valid && user.stu_id != "") {
         var data = JSON.stringify({
-          stuID: user.stuID,
+          stu_id: user.stu_id,
           password: Base64.stringify(
-            sha256(user.stuID + user.password + user.stuID)
+            sha256(user.stu_id + user.password + user.stu_id)
           ),
         });
 
@@ -187,7 +187,7 @@ const login = (form: FormInstance | undefined) => {
 };
 
 async function getStuID(key: string, val: string) {
-  if (key != "stuID") {
+  if (key != "stu_id") {
     var config = {
       method: "get",
       url: "portalApi/getStuID?key=" + key + "&value=" + val,
@@ -195,14 +195,14 @@ async function getStuID(key: string, val: string) {
 
     await axios(config)
       .then(function (response) {
-        console.log("inapi:", response.data.stuID);
-        user.stuID = response.data.stuID;
+        console.log("inapi:", response.data.stu_id);
+        user.stu_id = response.data.stu_id;
       })
       .catch(function (error) {
         console.log(error);
       });
   } else {
-    user.stuID = user.account;
+    user.stu_id = user.account;
   }
 }
 
