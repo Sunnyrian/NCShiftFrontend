@@ -24,9 +24,10 @@
 <script setup lang="ts">
 import {reactive} from "vue";
 import axios from "axios";
+import {GetUserInfoResponse} from "../api/user"
 
-const user = reactive({
-  stuID: "",
+let user = reactive({
+  stu_id: "",
   name: "",
   nickname: "",
   telephone: "",
@@ -35,19 +36,16 @@ const user = reactive({
 
 
 function getUserInformation() {
-  var config = {
-    method: "get",
-    url: "http://localhost:3500/userApi/getUserInfo",
-  };
-  axios(config)
-      .then(function (response) {
-        user.stuID = response.data.stuID;
-        user.name = response.data.name;
-        user.nickname = response.data.nickname;
-        user.telephone = response.data.telephone;
-        user.email = response.data.email;
+  axios.get<GetUserInfoResponse>("/userApi/userInfo")
+      .then(function (response){
+        user.stu_id = response.data.user.stu_id;
+        user.name = response.data.user.name;
+        user.nickname = response.data.user.nickname;
+        user.telephone = response.data.user.telephone;
+        user.email = response.data.user.email;
+        console.log(response)
       })
-      .catch(function (error) {
+        .catch(function (error) {
         console.log(error);
       });
 }
