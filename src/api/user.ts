@@ -1,4 +1,5 @@
 interface UserInfo {
+    id: number;
     stu_id: string;
     name: string;
     nickname: string;

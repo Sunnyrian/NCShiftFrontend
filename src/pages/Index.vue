@@ -66,7 +66,7 @@ getUserInformation();
 function getUserInformation() {
   var config = {
     method: "get",
-    url: "http://localhost:3500/userApi/getUserInfo",
+    url: "http://localhost:3500/userApi/userInfo",
   };
   axios(config)
     .then(function (response) {
