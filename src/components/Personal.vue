@@ -8,7 +8,7 @@
         <el-button class="button" type="text" @click="cancelEditUserInfo" v-show="!disabledFlag">取消</el-button>
       </div>
     </template>
-    <el-form :model="user">
+    <el-form :model="user" v-loading="loading">
       <el-form-item label="姓名">
         <el-input v-model="user.name" disabled></el-input>
       </el-form-item>
@@ -24,7 +24,8 @@
       <el-form-item label="昵称">
         <el-input v-model="user.nickname" :disabled=disabledFlag></el-input>
       </el-form-item>
-    </el-form>
+        <span>职介: {{ User_Status_Name[user.status] }}</span>
+      </el-form>
   </el-card>
 
 
@@ -33,7 +34,9 @@
 <script setup lang="ts">
 import {reactive, ref} from "vue";
 import axios from "axios";
-import {GetUserInfoResponse, UserInfo} from "../api/user"
+import {API, GetUserInfoResponse, UserInfo} from "../api/user"
+import {ElNotification} from "element-plus";
+import {User_Status, User_Status_Name} from "../const/user";
 
 let user = reactive<UserInfo>({
   id: 0,
@@ -42,6 +45,7 @@ let user = reactive<UserInfo>({
   nickname: '',
   telephone: '',
   email: '',
+  status: 0,
 })
 
 // 用于暂存能被修改的字段
@@ -50,9 +54,10 @@ let telephone = '';
 let email = '';
 
 const disabledFlag = ref(true)
+const loading = ref(true)
 
 function getUserInformation() {
-  axios.get<GetUserInfoResponse>("/userApi/userInfo")
+  axios.get<GetUserInfoResponse>(API.GET_UserInfo)
       .then(function (response){
         user.id = response.data.user.id;
         user.stu_id = response.data.user.stu_id;
@@ -60,12 +65,17 @@ function getUserInformation() {
         user.nickname = response.data.user.nickname;
         user.telephone = response.data.user.telephone;
         user.email = response.data.user.email;
+        user.status = response.data.user.status;
         nickname = response.data.user.nickname;
         telephone = response.data.user.telephone;
         email = response.data.user.email;
-      })
-        .catch(function (error) {
-        console.log(error);
+        loading.value = false
+      }).catch(function (error) {
+        ElNotification({
+          title: '出错啦',
+          message: error.response.data.err.Message,
+          type: 'error',
+        })
       });
 }
 
@@ -83,6 +93,7 @@ function editUserInfo() {
 }
 
 function saveUserInfo() {
+  disabledFlag.value = true
   // 如果没有修改过 user 则不调用接口
   if (user.email == email && user.nickname == nickname && user.telephone == telephone) {
     disabledFlag.value = true
@@ -90,10 +101,19 @@ function saveUserInfo() {
   }
   axios.put("/userApi/user", user).then(response => {
     console.log(response.data);
+    ElNotification({
+      title: '修改成功!',
+      type: 'success',
+    })
   }).catch(error => {
-    console.log(error);
+    ElNotification({
+      title: '出错啦',
+      message: error.response.data.err.Message,
+      type: 'error',
+    })
+    disabledFlag.value = false
+    return
   });
-  disabledFlag.value = true
 }
 
 function cancelEditUserInfo() {
