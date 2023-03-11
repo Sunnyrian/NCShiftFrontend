@@ -4,7 +4,7 @@ import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import Home from '../pages/Index.vue'
 import Admin from '../pages/Admin.vue';
-import NAList from '../components/NAList.vue';
+import UserList from '../components/UsersList.vue';
 import NotFound from '../pages/NotFound.vue'
 import NotAdmin from '../pages/NotAdmin.vue'
 import Setting from '../components/Setting.vue'
@@ -15,6 +15,7 @@ import Personal from '../components/Personal.vue'
 import { tr } from 'element-plus/lib/locale'
 import axios from 'axios'
 import cookie from '../api/cookie.js'
+import {User_Status} from "../const/user";
 
 
 
@@ -77,9 +78,9 @@ const routes: Array<RouteRecordRaw> = [
         component: Admin,
         children: [
             {
-                path: 'NAList/:status',
-                name: 'NAList',
-                component: NAList,
+                path: 'Users/:status',
+                name: 'Users',
+                component: UserList,
             },
             {
                 path: 'Setting',
@@ -114,7 +115,7 @@ let adminStatus:boolean
 
 router.beforeEach((to, from) => {
 
-    let token = cookie.get("token")
+    const token = cookie.get("token")
     console.log("beforeEach~")
     if ( to.name != 'Login' && to.name != 'Register'){
         if (token === null) {
@@ -156,15 +157,19 @@ function changeRouteToAdmin (adminStatus: boolean) {
 
 async function checkLogin() {
 
-    var config = {
-    method: 'get',
-    url: 'portalApi/checkLogin',
+    const config = {
+        method: 'get',
+        url: 'portalApi/checkLogin',
     };
 
     await axios(config)
     .then(function (response:any) {
         loginStatus = response.data.success
-        adminStatus = response.data.admin
+        if (response.data.status == User_Status.Admin) {
+            adminStatus = true
+        } else {
+            adminStatus = false
+        }
         return adminStatus
     })
     .catch(function (error:any) {

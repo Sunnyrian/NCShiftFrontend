@@ -1,37 +1,39 @@
 <template>
-  <el-dropdown @command="handleCommand" class="header-userInfo">
-    <span>{{ user.nickname }}
-    <el-icon>
-      <arrow-down/>
-    </el-icon>
-    </span>
-    <template #dropdown>
-      <el-dropdown-menu>
-        <el-dropdown-item>
-          当前角色: {{ User_Status_Name[user.status] }}
-        </el-dropdown-item>
-        <el-dropdown-item>
-          个人中心
-        </el-dropdown-item>
-        <el-dropdown-item command="logOut" divided>
-          退出登录
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
-  <el-container>
-    <el-aside width="200px">
-      <side-bar></side-bar>
-    </el-aside>
+  <div class="common-layout">
     <el-container>
-      <el-main>
-        <router-view></router-view>
-      </el-main>
-      <el-footer>
-        <IndexFooter></IndexFooter>
-      </el-footer>
+      <el-header>
+        <el-dropdown @command="handleCommand" class="header-userInfo">
+          <span>{{ user.nickname }}
+          <el-icon>
+            <arrow-down/>
+          </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item>
+                当前角色: {{ User_Status_Name[user.status] }}
+              </el-dropdown-item>
+              <el-dropdown-item>
+                个人中心
+              </el-dropdown-item>
+              <el-dropdown-item command="logOut" divided>
+                退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </el-header>
+      <el-container>
+        <el-aside width="200px">
+          <side-bar></side-bar>
+        </el-aside>
+        <el-container>
+          <el-main><router-view></router-view></el-main>
+          <el-footer><IndexFooter></IndexFooter></el-footer>
+        </el-container>
+      </el-container>
     </el-container>
-  </el-container>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -58,6 +60,9 @@ let user = reactive<UserInfo>({
   telephone: '',
   email: '',
   status: 0,
+  create_time: 0,
+  update_time: 0,
+  occupation_init_status: 0,
 })
 
 getUserInformation();

@@ -21,7 +21,7 @@ declare module '@vue/runtime-core' {
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTableV2: typeof import('element-plus/es')['ElTableV2']
-    NAList: typeof import('./components/NAList.vue')['default']
+    UserList: typeof import('./components/UsersList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Setting: typeof import('./components/Setting.vue')['default']

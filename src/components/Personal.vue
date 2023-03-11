@@ -45,7 +45,7 @@ let user = reactive<UserInfo>({
   nickname: '',
   telephone: '',
   email: '',
-  status: 0,
+  status: -1,
 })
 
 // 用于暂存能被修改的字段

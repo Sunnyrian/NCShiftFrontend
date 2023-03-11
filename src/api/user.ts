@@ -4,7 +4,7 @@ export const API = {
     GET_OccupationTable: '/userApi/occupationTable',
     PUT_User: '/userApi/user',
     POST_XlsUpload: '/userApi/xlsUpload',
-    GET_UserInfo: '/userApi/userInfo',
+    GET_UserInfo: '/userApi/user',
 }
 
 interface UserInfo {
@@ -15,6 +15,9 @@ interface UserInfo {
     telephone: string;
     email: string;
     status: number;
+    create_time: number;
+    update_time: number;
+    occupation_init_status: number;
 }
 
 interface GetUserInfoResponse {

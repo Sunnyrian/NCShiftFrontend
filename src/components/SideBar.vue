@@ -28,6 +28,10 @@
       <el-icon><HomeFilled /></el-icon>
       <template #title>个人中心</template>
     </el-menu-item>
+    <el-menu-item index="/Admin">
+      <el-icon><Setting /></el-icon>
+      <template #title>管理后台</template>
+    </el-menu-item>
   </el-menu>
 </template>
 
@@ -41,6 +45,7 @@ import {
   HomeFilled,
   DocumentAdd,
   List,
+  Setting,
 } from "@element-plus/icons-vue";
 import cookie from "../api/cookie";
 import { useRouter, useRoute } from "vue-router";
