@@ -11,6 +11,7 @@ specifiers:
   '@vue/runtime-core': ^3.2.31
   '@vueuse/core': ^8.9.4
   '@vueuse/head': github:vueuse/head
+  async-validator: ^4.2.5
   axios: ^0.27.2
   crypto-js: ^4.1.1
   dayjs: ^1.11.7
@@ -34,6 +35,7 @@ dependencies:
   '@element-plus/icons-vue': 2.0.10_vue@3.2.47
   '@vueuse/core': 8.9.4_vue@3.2.47
   '@vueuse/head': github.com/vueuse/head/00f05f824208be11022f45d055cc13e38656b007_vue@3.2.47
+  async-validator: 4.2.5
   axios: 0.27.2
   crypto-js: 4.1.1
   dayjs: 1.11.7
@@ -814,7 +816,7 @@ packages:
     dev: true
 
   /async-validator/4.2.5:
-    resolution: {integrity: sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npm.taobao.org/async-validator/-/async-validator-4.2.5.tgz}
+    resolution: {integrity: sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==}
     dev: false
 
   /asynckit/0.4.0:
@@ -3082,7 +3084,7 @@ packages:
     dev: false
 
   github.com/vueuse/head/00f05f824208be11022f45d055cc13e38656b007_vue@3.2.47:
-    resolution: {commit: 00f05f824208be11022f45d055cc13e38656b007, repo: git+ssh://git@github.com/vueuse/head.git, type: git}
+    resolution: {tarball: https://codeload.github.com/vueuse/head/tar.gz/00f05f824208be11022f45d055cc13e38656b007}
     id: github.com/vueuse/head/00f05f824208be11022f45d055cc13e38656b007
     name: '@vueuse/head'
     version: 1.1.19

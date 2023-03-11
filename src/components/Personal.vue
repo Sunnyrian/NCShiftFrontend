@@ -24,6 +24,7 @@
       <el-form-item label="昵称">
         <el-input v-model="user.nickname" :disabled=disabledFlag></el-input>
       </el-form-item>
+      <div>上任时间: {{ formatTime(user.create_time) }}</div>
         <span>职介: {{ User_Status_Name[user.status] }}</span>
       </el-form>
   </el-card>
@@ -35,10 +36,12 @@
 import {reactive, ref} from "vue";
 import axios from "axios";
 import {API, GetUserInfoResponse, UserInfo} from "../api/user"
-import {ElNotification} from "element-plus";
+import {ElNotification, ElMessage} from "element-plus";
 import {User_Status, User_Status_Name} from "../const/user";
+import dayjs from "dayjs";
+import Schema from 'async-validator';
 
-let user = reactive<UserInfo>({
+let user = ref<UserInfo>({
   id: 0,
   stu_id: '',
   name: '',
@@ -46,6 +49,9 @@ let user = reactive<UserInfo>({
   telephone: '',
   email: '',
   status: -1,
+  create_time: 0,
+  update_time: 0,
+  occupation_init_status: 0,
 })
 
 // 用于暂存能被修改的字段
@@ -59,13 +65,7 @@ const loading = ref(true)
 function getUserInformation() {
   axios.get<GetUserInfoResponse>(API.GET_UserInfo)
       .then(function (response){
-        user.id = response.data.user.id;
-        user.stu_id = response.data.user.stu_id;
-        user.name = response.data.user.name;
-        user.nickname = response.data.user.nickname;
-        user.telephone = response.data.user.telephone;
-        user.email = response.data.user.email;
-        user.status = response.data.user.status;
+        user.value = response.data.user
         nickname = response.data.user.nickname;
         telephone = response.data.user.telephone;
         email = response.data.user.email;
@@ -79,13 +79,6 @@ function getUserInformation() {
       });
 }
 
-// 问：上面的axios代码中为什么不直接 user = response.data，而是要给每一个字段赋值呢？
-// 答：如果直接将 `user` 赋值为 `response.data`，那么 `user` 就会变成一个普通的 JavaScript 对象，而不是 `reactive` 对象，它的属性将不会被视图跟踪更新。此时如果我们修改 `user` 对象的属性，视图不会响应更新。
-//
-// 为了让 `user` 对象的属性能够被视图跟踪更新，我们需要使用 `reactive` 函数将其转化成响应式对象。在 Vue.js 中，当获取到响应式对象的属性时，会触发 getter 函数，而当我们修改响应式对象的属性时，会触发 setter 函数，从而通知 Vue.js 更新视图。
-//
-// 所以，对响应式对象的修改需要使用属性赋值的方式来更新。即使你要更新的属性只有一个或者几个，也都需要一个一个地赋值，否则这些属性的值不会被视图和响应式系统所跟踪和更新。
-
 getUserInformation();
 
 function editUserInfo() {
@@ -93,22 +86,38 @@ function editUserInfo() {
 }
 
 function saveUserInfo() {
-  disabledFlag.value = true
   // 如果没有修改过 user 则不调用接口
-  if (user.email == email && user.nickname == nickname && user.telephone == telephone) {
+  if (user.value.email == email && user.value.nickname == nickname && user.value.telephone == telephone) {
     disabledFlag.value = true
     return
   }
-  axios.put("/userApi/user", user).then(response => {
-    console.log(response.data);
+  if (user.value.nickname == '') {
+    alert('昵称不能为空！')
+  }
+  if (!/^1\d{10}$/.test(user.value.telephone)) {
+    ElMessage({
+      type: 'error',
+      message: `请输入11位的大陆电话号码`,
+    })
+    return
+  }
+  if (!/^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(user.value.email)) {
+    ElMessage({
+      type: 'error',
+      message: `请输入正确的邮箱`,
+    })
+    return
+  }
+  axios.put("/userApi/user", user.value).then(response => {
     ElNotification({
       title: '修改成功!',
       type: 'success',
     })
+    disabledFlag.value = true
   }).catch(error => {
     ElNotification({
       title: '出错啦',
-      message: error.response.data.err.Message,
+      message: error.response.data.err,
       type: 'error',
     })
     disabledFlag.value = false
@@ -118,11 +127,17 @@ function saveUserInfo() {
 
 function cancelEditUserInfo() {
   // 恢复数据
-  user.email = email
-  user.telephone = telephone
-  user.nickname = nickname
+  user.value.email = email
+  user.value.telephone = telephone
+  user.value.nickname = nickname
   disabledFlag.value = true
 }
+
+// 将后端的 UNIX 时间转换为人看的时间
+const formatTime = (timestamp: number) => dayjs(timestamp * 1000).format('YYYY-MM-DD')
+
+
+
 
 </script>
 

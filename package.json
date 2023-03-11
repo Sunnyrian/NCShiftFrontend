@@ -11,6 +11,7 @@
     "@element-plus/icons-vue": "^2.0.0-beta.0",
     "@vueuse/core": "^8.9.4",
     "@vueuse/head": "github:vueuse/head",
+    "async-validator": "^4.2.5",
     "axios": "^0.27.2",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.7",
