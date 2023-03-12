@@ -17,11 +17,6 @@
           {{ formatTime(row.create_time) }}
         </template>
       </el-table-column>
-<!--      <el-table-column prop="update_time" label="更新时间">-->
-<!--        <template #default="{ row }">-->
-<!--          {{ formatTime(row.update_time) }}-->
-<!--        </template>-->
-<!--      </el-table-column>-->
       <el-table-column prop="occupation_init_status" label="空闲表">
         <template #default="{ row }">
           {{ formatInitializeStatus(row.occupation_init_status) }}

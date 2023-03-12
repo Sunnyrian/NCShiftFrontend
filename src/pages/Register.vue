@@ -102,7 +102,7 @@ const validatePass = (rule: any, value: string, callback: any) => {
 
 const validatePass2 = (rule: any, value: string, callback: any) => {
     if (value === '') {
-        callback(new Error('请再次输入密码')) 
+        callback(new Error('请再次输入密码'))
     } else if (value !== user.password) {
         callback(new Error("两次输入密码不匹配!"))
     } else {
@@ -112,14 +112,14 @@ const validatePass2 = (rule: any, value: string, callback: any) => {
 
 const validateNickname = (rule: any, value: string, callback: any) => {
     if (value === '') {
-        callback(new Error('请输入昵称')) 
+        callback(new Error('请输入昵称'))
     } else if ((/[\'\";]/.test(value))) {
         callback(new Error('昵称不能包含单引号、双引号或分号'))
     } else if (value.length > 30) {
       callback(new Error('昵称长度不能大于30'))
     } else {
         checkExist("nickname", value).then( () => {
-            if (exist == true) {
+            if (exist) {
             callback(new Error('该用户名已被注册'))
         }
         callback()
@@ -129,7 +129,7 @@ const validateNickname = (rule: any, value: string, callback: any) => {
 
 const validateName = (rule: any, value: string, callback: any) => {
     if (value === '') {
-        callback(new Error('请输入您的名字')) 
+        callback(new Error('请输入您的名字'))
     } else  if (!/^[\u4e00-\u9fa5·]{2,20}$/.test(value)) {
       callback(new Error('姓名必须是2-20个中文汉字或·'))
     } else {
@@ -139,12 +139,12 @@ const validateName = (rule: any, value: string, callback: any) => {
 
 const validateStuID = (rule: any, value: string, callback: any) => {
     if (value === '') {
-        callback(new Error('请输入您的学号')) 
+        callback(new Error('请输入您的学号'))
     } else if(!/^\d{11,12}$/.test(value)) {
       callback(new Error('学号必须是11位或12位数字'))
     } else {
         checkExist("stuID", value).then( () => {
-            if (exist == true) {
+            if (exist) {
             callback(new Error('该学号已注册'))
         }
         callback()
@@ -154,12 +154,12 @@ const validateStuID = (rule: any, value: string, callback: any) => {
 
 const validateTel = (rule: any, value: string, callback: any) => {
     if (value === '') {
-        callback(new Error('请输入您的电话')) 
+        callback(new Error('请输入您的电话'))
     } else if ((!/^1[3456789]\d{9}$/.test(value))){
         callback(new Error('请输入正确的大陆号码'))
     } else {
         checkExist("telephone", value).then( () => {
-            if (exist == true) {
+            if (exist) {
             callback(new Error('该电话已被注册'))
         }
         callback()
@@ -174,7 +174,7 @@ const validateEmail = (rule: any, value: string, callback: any) => {
         callback(new Error('请输入正确格式的邮箱'))
     } else {
         checkExist("email", value).then( () => {
-            if (exist == true) {
+            if (exist) {
             callback(new Error('该邮箱已被注册'))
         }
         callback()
@@ -296,7 +296,6 @@ async function checkExist(key : string, val : string){
     } catch (error) {
         console.error(error);
     }
-    
 }
 
 </script>
