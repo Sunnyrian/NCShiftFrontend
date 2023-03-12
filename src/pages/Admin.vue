@@ -47,10 +47,6 @@
               <el-icon><Document /></el-icon>
               <template #title>日志文件</template>
             </el-menu-item>
-            <el-menu-item index="/dingding">
-              <el-icon><Bell /></el-icon>
-              <template #title>钉钉对接</template>
-            </el-menu-item>
           </el-menu>
         </el-aside>
         <el-container>
