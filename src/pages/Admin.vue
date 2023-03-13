@@ -53,7 +53,9 @@
           <el-main>
             <router-view></router-view>
           </el-main>
-          <el-footer><IndexFooter></IndexFooter></el-footer>
+          <el-footer>
+            <IndexFooter></IndexFooter>
+          </el-footer>
         </el-container>
       </el-container>
     </el-container>
@@ -71,6 +73,7 @@ import {
   List,
   Bell,
 } from "@element-plus/icons-vue";
+import IndexFooter from "../components/Footer.vue"
 import cookie from "../api/cookie";
 import { useRouter, useRoute } from "vue-router";
 

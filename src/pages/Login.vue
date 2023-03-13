@@ -1,6 +1,6 @@
 <template>
   <el-form
-    label-position="Right"
+    label-position="right"
     label-width="100px"
     :model="user"
     style="max-width: 320px"

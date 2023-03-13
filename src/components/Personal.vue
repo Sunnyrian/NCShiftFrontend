@@ -25,7 +25,7 @@
         <el-input v-model="user.nickname" :disabled=disabledFlag></el-input>
       </el-form-item>
       <div>上任时间: {{ formatTime(user.create_time) }}</div>
-        <span>职介: {{ User_Status_Name[user.status] }}</span>
+      <span>职介: {{ User_Status_Name[user.status] }}</span>
       </el-form>
   </el-card>
 
@@ -88,40 +88,32 @@ function editUserInfo() {
   disabledFlag.value = false
 }
 
-const  saveUserInfo = (form: FormInstance | undefined) => {
-  if (!form) return
-  form.validate((valid) => {
-    if (valid) {
-      // 如果没有修改过 user 则不调用接口
-      if (user.value.email == email && user.value.nickname == nickname && user.value.telephone == telephone) {
-        disabledFlag.value = true
-        return
-      }
+const  saveUserInfo = () => {
+  // 如果没有修改过 user 则不调用接口
+  if (user.value.email == email && user.value.nickname == nickname && user.value.telephone == telephone) {
+    disabledFlag.value = true
+    return
+  }
 
-      axios.put("/userApi/user", user.value).then(response => {
-        ElNotification({
-          title: '修改成功!',
-          type: 'success',
-        })
-        // 更新临时数据
-        email=user.value.email
-        telephone=user.value.telephone
-        nickname=user.value.nickname
-        disabledFlag.value = true
-      }).catch(error => {
-        ElNotification({
-          title: '出错啦',
-          message: error.response.data.err,
-          type: 'error',
-        })
-        disabledFlag.value = false
-        return
-      });
-    } else {
-      console.log('error submit!')
-      return false
-    }
-  })
+  axios.put("/userApi/user", user.value).then(response => {
+    ElNotification({
+      title: '修改成功!',
+      type: 'success',
+    })
+    // 更新临时数据
+    email=user.value.email
+    telephone=user.value.telephone
+    nickname=user.value.nickname
+    disabledFlag.value = true
+  }).catch(error => {
+    ElNotification({
+      title: '出错啦',
+      message: error.response.data.err,
+      type: 'error',
+    })
+    disabledFlag.value = false
+    return
+  });
 }
 
 function cancelEditUserInfo() {
@@ -158,7 +150,7 @@ const validateNickname = (rule: any, value: string, callback: any) => {
     callback(new Error('昵称不能包含单引号、双引号或分号'))
   } else if (value.length > 30) {
     callback(new Error('昵称长度不能大于30'))
-  } else {
+  } else if (nickname != value){
     checkExist("nickname", value).then( () => {
       if (exist) {
         callback(new Error('该用户名已被注册'))
@@ -173,7 +165,7 @@ const validateTel = (rule: any, value: string, callback: any) => {
     callback(new Error('请输入您的电话'))
   } else if ((!/^1[3456789]\d{9}$/.test(value))){
     callback(new Error('请输入正确的大陆号码'))
-  } else {
+  } else if (telephone != value){
     checkExist("telephone", value).then( () => {
       if (exist) {
         callback(new Error('该电话已被注册'))
@@ -188,7 +180,7 @@ const validateEmail = (rule: any, value: string, callback: any) => {
     callback(new Error('请输入您的邮箱'))
   } else if (!/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value)) {
     callback(new Error('请输入正确格式的邮箱'))
-  } else {
+  } else if (email != value){
     checkExist("email", value).then( () => {
       if (exist) {
         callback(new Error('该邮箱已被注册'))
