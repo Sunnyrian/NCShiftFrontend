@@ -202,9 +202,6 @@ const saveUserInfo = async(formEl: FormInstance | undefined, user: UserInfo) => 
     if (valid) {
       // 如果没有修改过 user 则不调用接口
       if (user == userTemp) {
-        console.log("budiaoyong")
-        console.log(user)
-        console.log(userTemp)
         disabledFlag.value = true
         return
       }

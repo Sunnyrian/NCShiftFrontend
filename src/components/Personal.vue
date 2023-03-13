@@ -4,11 +4,11 @@
       <div class="card-header">
         <span>用户信息</span>
         <el-button class="button" type="primary" @click="editUserInfo" v-show="disabledFlag">修改个人资料</el-button>
-        <el-button class="button" type="primary" @click="saveUserInfo" v-show="!disabledFlag">确认保存</el-button>
+        <el-button class="button" type="primary" @click="saveUserInfo(ruleFormRef)" v-show="!disabledFlag">确认保存</el-button>
         <el-button class="button" type="text" @click="cancelEditUserInfo" v-show="!disabledFlag">取消</el-button>
       </div>
     </template>
-    <el-form :model="user" v-loading="loading" :rules="rules" ref="ruleFormRef">
+    <el-form :model="user" v-loading="loading" :rules="rules" ref="ruleFormRef" :status-icon="!disabledFlag">
       <el-form-item label="姓名">
         <el-input v-model="user.name" disabled></el-input>
       </el-form-item>
@@ -88,32 +88,39 @@ function editUserInfo() {
   disabledFlag.value = false
 }
 
-const  saveUserInfo = () => {
-  // 如果没有修改过 user 则不调用接口
-  if (user.value.email == email && user.value.nickname == nickname && user.value.telephone == telephone) {
-    disabledFlag.value = true
-    return
-  }
+const  saveUserInfo = async(formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid) => {
+    if (valid) {
+      // 如果没有修改过 user 则不调用接口
+      if (user.value.email == email && user.value.nickname == nickname && user.value.telephone == telephone) {
+        disabledFlag.value = true
+        return
+      }
 
-  axios.put("/userApi/user", user.value).then(response => {
-    ElNotification({
-      title: '修改成功!',
-      type: 'success',
-    })
-    // 更新临时数据
-    email=user.value.email
-    telephone=user.value.telephone
-    nickname=user.value.nickname
-    disabledFlag.value = true
-  }).catch(error => {
-    ElNotification({
-      title: '出错啦',
-      message: error.response.data.err,
-      type: 'error',
-    })
-    disabledFlag.value = false
-    return
-  });
+      axios.put("/userApi/user", user.value).then(response => {
+        ElNotification({
+          title: '修改成功!',
+          type: 'success',
+        })
+        // 更新临时数据
+        email=user.value.email
+        telephone=user.value.telephone
+        nickname=user.value.nickname
+        disabledFlag.value = true
+      }).catch(error => {
+        ElNotification({
+          title: '出错啦',
+          message: error.response.data.err,
+          type: 'error',
+        })
+        disabledFlag.value = false
+        return
+      });
+    } else {
+      console.log('error submit!')
+    }
+  })
 }
 
 function cancelEditUserInfo() {
@@ -150,28 +157,45 @@ const validateNickname = (rule: any, value: string, callback: any) => {
     callback(new Error('昵称不能包含单引号、双引号或分号'))
   } else if (value.length > 30) {
     callback(new Error('昵称长度不能大于30'))
-  } else if (nickname != value){
-    checkExist("nickname", value).then( () => {
-      if (exist) {
-        callback(new Error('该用户名已被注册'))
-      }
-      callback()
-    })
+  } else if (nickname != value) {
+    checkExist("nickname", value)
+        .then(() => {
+          if (exist) {
+            callback(new Error('该昵称已被注册'))
+          } else {
+            callback()
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          callback(new Error('验证失败，请稍后再试'))
+        })
+  } else {
+    callback()
   }
 }
+
 
 const validateTel = (rule: any, value: string, callback: any) => {
   if (value === '') {
     callback(new Error('请输入您的电话'))
   } else if ((!/^1[3456789]\d{9}$/.test(value))){
     callback(new Error('请输入正确的大陆号码'))
-  } else if (telephone != value){
-    checkExist("telephone", value).then( () => {
-      if (exist) {
-        callback(new Error('该电话已被注册'))
-      }
-      callback()
-    })
+  } else if (telephone != value) {
+    checkExist("telephone", value)
+        .then(() => {
+          if (exist) {
+            callback(new Error('该电话已被注册'))
+          } else {
+            callback()
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          callback(new Error('验证失败，请稍后再试'))
+        })
+  } else {
+    callback()
   }
 }
 
@@ -180,13 +204,21 @@ const validateEmail = (rule: any, value: string, callback: any) => {
     callback(new Error('请输入您的邮箱'))
   } else if (!/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value)) {
     callback(new Error('请输入正确格式的邮箱'))
-  } else if (email != value){
-    checkExist("email", value).then( () => {
-      if (exist) {
-        callback(new Error('该邮箱已被注册'))
-      }
-      callback()
-    })
+  } else if (email != value) {
+    checkExist("email", value)
+        .then(() => {
+          if (exist) {
+            callback(new Error('该邮箱已被注册'))
+          } else {
+            callback()
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          callback(new Error('验证失败，请稍后再试'))
+        })
+  } else {
+    callback()
   }
 }
 
